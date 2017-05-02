@@ -107,7 +107,7 @@ export class MyApp {
 				notificationAlert.present();
 			},
 			error => {
-				console.error('Error refreshing token', error);
+				console.error('Error getting the notification', error);
 			});
 	}
 }
