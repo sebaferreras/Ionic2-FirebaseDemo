@@ -16,9 +16,6 @@ export class NotificationModel {
 	public body: string;
 	public title: string;
 	public tap: boolean
-
-	public ojsTitle: string;
-	public ojsBody: string;
 }
 
 @Component({
@@ -28,11 +25,11 @@ export class MyApp {
 	rootPage: any = HomePage;
 
 	constructor(private platform: Platform,
-				private alertCtrl: AlertController,
-				private firebase: Firebase,
-				private statusBar: StatusBar,
-				private splashScreen: SplashScreen) {
-					
+		private alertCtrl: AlertController,
+		private firebase: Firebase,
+		private statusBar: StatusBar,
+		private splashScreen: SplashScreen) {
+
 		this.platform.ready().then(() => {
 			this.statusBar.styleDefault();
 			this.splashScreen.hide();
@@ -50,8 +47,18 @@ export class MyApp {
 		return this.firebase.getToken()
 			.catch(error => console.error('Error getting token', error))
 			.then(token => {
+
 				console.log(`The token is ${token}`);
-				this.saveToken(token).then(() => {
+
+				Promise.all([
+					this.firebase.subscribe('firebase-app'), 	// Subscribe to the entire app
+					this.firebase.subscribe('android'),			// Subscribe to android users topic
+					this.firebase.subscribe('userid-1') 		// Subscribe using the user id (hardcoded in this example)
+				]).then((result) => {
+					if (result[0]) console.log(`Subscribed to FirebaseDemo`);
+					if (result[1]) console.log(`Subscribed to Android`);
+					if (result[2]) console.log(`Subscribed as User`);
+
 					this.subscribeToPushNotificationEvents();
 				});
 			});
@@ -64,8 +71,19 @@ export class MyApp {
 				this.firebase.getToken()
 					.catch(error => console.error('Error getting token', error))
 					.then(token => {
+
 						console.log(`The token is ${token}`);
-						this.saveToken(token).then(() => {
+
+						Promise.all([
+							this.firebase.subscribe('firebase-app'),
+							this.firebase.subscribe('ios'),
+							this.firebase.subscribe('userid-2')
+						]).then((result) => {
+
+							if (result[0]) console.log(`Subscribed to FirebaseDemo`);
+							if (result[1]) console.log(`Subscribed to iOS`);
+							if (result[2]) console.log(`Subscribed as User`);
+
 							this.subscribeToPushNotificationEvents();
 						});
 					});
@@ -100,8 +118,8 @@ export class MyApp {
 					: console.log('The app was closed when the notification arrived...');
 
 				let notificationAlert = this.alertCtrl.create({
-					title: notification.ojsTitle,
-					message: notification.ojsBody,
+					title: notification.title,
+					message: notification.body,
 					buttons: ['Ok']
 				});
 				notificationAlert.present();
